@@ -1,405 +1,170 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Marginalia — your word list</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --paper: #FAF6EE;
-    --paper-raised: #FFFFFF;
-    --ink: #23241F;
-    --ink-soft: #63645C;
-    --rule: #DDD6C4;
-    --burgundy: #7C3B3B;
-    --burgundy-deep: #5E2C2C;
-    --sage: #6C7A5D;
-    --error: #A23B3B;
-  }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
-  body{
-    background: var(--paper);
-    color: var(--ink);
-    font-family: 'Inter', sans-serif;
-    min-height: 100vh;
-    -webkit-font-smoothing: antialiased;
-  }
-  .page{
-    max-width: 640px;
-    margin: 0 auto;
-    padding: 36px 20px 80px;
-  }
-  header{
-    margin-bottom: 28px;
-  }
-  .kicker{
-    font-family: 'Source Serif 4', serif;
-    font-style: italic;
-    color: var(--ink-soft);
-    font-size: 15px;
-    margin: 0 0 4px;
-  }
-  h1{
-    font-family: 'Source Serif 4', serif;
-    font-weight: 600;
-    font-size: 32px;
-    margin: 0;
-    letter-spacing: -0.01em;
-    color: var(--ink);
-  }
-  .count{
-    font-size: 13px;
-    color: var(--ink-soft);
-    margin-top: 6px;
-  }
-
-  form.lookup{
-    display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
-  }
-  input[type="text"]{
-    flex: 1;
-    font-family: 'Source Serif 4', serif;
-    font-size: 19px;
-    padding: 12px 14px;
-    border: 1.5px solid var(--rule);
-    border-radius: 6px;
-    background: var(--paper-raised);
-    color: var(--ink);
-    outline: none;
-    transition: border-color 0.15s ease;
-  }
-  input[type="text"]:focus{
-    border-color: var(--burgundy);
-  }
-  button{
-    font-family: 'Inter', sans-serif;
-    font-weight: 600;
-    font-size: 15px;
-    padding: 0 20px;
-    border: none;
-    border-radius: 6px;
-    background: var(--burgundy);
-    color: #fff;
-    cursor: pointer;
-    transition: background 0.15s ease;
-  }
-  button:hover:not(:disabled){ background: var(--burgundy-deep); }
-  button:disabled{ opacity: 0.55; cursor: default; }
-
-  .status{
-    min-height: 20px;
-    font-size: 13.5px;
-    color: var(--ink-soft);
-    margin-bottom: 22px;
-  }
-  .status.error{ color: var(--error); }
-
-  .searchbar{
-    margin: 30px 0 14px;
-  }
-  .searchbar input{
-    width: 100%;
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    padding: 8px 12px;
-    border: 1px solid var(--rule);
-    border-radius: 5px;
-    background: transparent;
-    color: var(--ink-soft);
-  }
-
-  .entries{
-    display: flex;
-    flex-direction: column;
-  }
-  .entry{
-    padding: 20px 0;
-    border-bottom: 1px solid var(--rule);
-    position: relative;
-  }
-  .entry:first-child{ padding-top: 4px; }
-  .entry-top{
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 12px;
-  }
-  .entry-word{
-    font-family: 'Source Serif 4', serif;
-    font-weight: 600;
-    font-size: 22px;
-    color: var(--ink);
-  }
-  .entry-pos{
-    font-family: 'Source Serif 4', serif;
-    font-style: italic;
-    font-size: 14px;
-    color: var(--sage);
-    margin-left: 8px;
-  }
-  .entry-date{
-    font-size: 12px;
-    color: var(--ink-soft);
-    white-space: nowrap;
-  }
-  .entry-meaning{
-    font-size: 15.5px;
-    line-height: 1.55;
-    margin: 8px 0 0;
-    color: var(--ink);
-  }
-  .entry-example{
-    font-family: 'Source Serif 4', serif;
-    font-style: italic;
-    font-size: 14.5px;
-    line-height: 1.5;
-    color: var(--ink-soft);
-    margin: 8px 0 0;
-    padding-left: 12px;
-    border-left: 2px solid var(--rule);
-  }
-  .entry-remove{
-    background: none;
-    border: none;
-    color: var(--ink-soft);
-    font-size: 12.5px;
-    padding: 0;
-    margin-top: 10px;
-    cursor: pointer;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-  }
-  .entry-remove:hover{ color: var(--error); }
-
-  .empty{
-    padding: 40px 0;
-    text-align: center;
-    color: var(--ink-soft);
-    font-family: 'Source Serif 4', serif;
-    font-style: italic;
-    font-size: 16px;
-  }
-
-  .skeleton{
-    padding: 20px 0;
-    border-bottom: 1px solid var(--rule);
-  }
-  .skeleton .bar{
-    height: 12px;
-    background: var(--rule);
-    border-radius: 4px;
-    opacity: 0.5;
-    animation: pulse 1.2s ease-in-out infinite;
-  }
-  .skeleton .bar.w1{ width: 30%; margin-bottom: 10px; height: 18px; }
-  .skeleton .bar.w2{ width: 90%; margin-bottom: 6px; }
-  .skeleton .bar.w3{ width: 70%; }
-  @keyframes pulse{ 0%,100%{opacity:0.35;} 50%{opacity:0.65;} }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>My Dictionary</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { margin: 0; padding: 20px; background: #0f172a; color: #f8fafc; max-width: 600px; margin: 0 auto; }
+    h1 { font-size: 1.5rem; margin-bottom: 1rem; text-align: center; }
+    .search-box { display: flex; gap: 8px; margin-bottom: 16px; }
+    input { flex: 1; padding: 12px 14px; border-radius: 10px; border: 1px solid #334155; background: #1e293b; color: white; font-size: 1rem; outline: none; }
+    input:focus { border-color: #3b82f6; }
+    button { background: #3b82f6; color: white; border: none; padding: 12px 16px; border-radius: 10px; font-weight: 600; cursor: pointer; }
+    .card { background: #1e293b; border-radius: 12px; padding: 16px; margin-bottom: 20px; border: 1px solid #334155; }
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .tag { background: #334155; color: #93c5fd; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; }
+    .add-btn { width: 100%; margin-top: 14px; background: #10b981; padding: 12px; font-size: 0.95rem; }
+    .word-item { background: #1e293b; border-radius: 10px; padding: 14px; margin-bottom: 10px; border-left: 4px solid #3b82f6; }
+    .word-head { display: flex; justify-content: space-between; align-items: baseline; }
+    .del-btn { background: transparent; color: #ef4444; padding: 0; font-size: 0.85rem; }
+    .status-msg { font-size: 0.85rem; color: #94a3b8; margin-top: 6px; }
+  </style>
 </head>
 <body>
-<div class="page">
-  <header>
-    <p class="kicker">while you read</p>
-    <h1>Marginalia</h1>
-    <p class="count" id="count">Loading your list…</p>
-  </header>
 
-  <form class="lookup" id="lookupForm">
-    <input type="text" id="wordInput" placeholder="Type a word you just met…" autocomplete="off" autocapitalize="off" spellcheck="false">
-    <button type="submit" id="lookupBtn">Look up</button>
-  </form>
-  <div class="status" id="status"></div>
+  <h1>📖 My Dictionary</h1>
 
-  <div class="searchbar">
-    <input type="text" id="searchInput" placeholder="Search your saved words…">
+  <div class="search-box">
+    <input type="text" id="wordInput" placeholder="Look up a word (e.g., ephemeral)..." />
+    <button id="searchBtn" onclick="lookupWord()">Search</button>
   </div>
 
-  <div class="entries" id="entries"></div>
-</div>
+  <div id="resultArea" style="display:none;" class="card">
+    <h2 id="resultWord" style="margin:0 0 6px 0;"></h2>
+    <p id="resultMeaning" style="margin: 0; color: #cbd5e1; font-size: 0.95rem; line-height: 1.4;"></p>
+    <div class="tags" id="resultSynonyms"></div>
+    <div id="statusIndicator" class="status-msg"></div>
+    <button id="addWordBtn" class="add-btn" onclick="saveCurrentWord()">+ Add to My Dictionary</button>
+  </div>
 
-<script>
-const entriesEl = document.getElementById('entries');
-const countEl = document.getElementById('count');
-const statusEl = document.getElementById('status');
-const form = document.getElementById('lookupForm');
-const wordInput = document.getElementById('wordInput');
-const lookupBtn = document.getElementById('lookupBtn');
-const searchInput = document.getElementById('searchInput');
+  <h3 style="margin-top: 24px; border-bottom: 1px solid #334155; padding-bottom: 8px;">Saved Words</h3>
+  <div id="wordList"></div>
 
-let allEntries = [];
+  <script>
+    let currentData = null;
 
-function setStatus(msg, isError){
-  statusEl.textContent = msg || '';
-  statusEl.classList.toggle('error', !!isError);
-}
+    // Enable 'Enter' key to trigger search
+    document.getElementById('wordInput').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') lookupWord();
+    });
 
-function keyFor(word){
-  return 'word:' + word.trim().toLowerCase();
-}
+    async function lookupWord() {
+      const query = document.getElementById('wordInput').value.trim().toLowerCase();
+      if (!query) return;
 
-function formatDate(iso){
-  const d = new Date(iso);
-  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-}
+      const resArea = document.getElementById('resultArea');
+      const resWord = document.getElementById('resultWord');
+      const resMeaning = document.getElementById('resultMeaning');
+      const resSynonyms = document.getElementById('resultSynonyms');
+      const addBtn = document.getElementById('addWordBtn');
+      const statusIndicator = document.getElementById('statusIndicator');
 
-async function loadEntries(){
-  entriesEl.innerHTML =
-    '<div class="skeleton"><div class="bar w1"></div><div class="bar w2"></div><div class="bar w3"></div></div>'.repeat(3);
-  try{
-    const list = await window.storage.list('word:');
-    const keys = (list && list.keys) ? list.keys : [];
-    const results = await Promise.all(keys.map(async k => {
-      try{
-        const r = await window.storage.get(k);
-        return r ? JSON.parse(r.value) : null;
-      }catch(e){ return null; }
-    }));
-    allEntries = results.filter(Boolean).sort((a,b) => new Date(b.addedAt) - new Date(a.addedAt));
-    renderEntries(allEntries);
-    updateCount();
-  }catch(e){
-    entriesEl.innerHTML = '';
-    countEl.textContent = "Couldn't load your list.";
-  }
-}
+      resArea.style.display = 'block';
+      resWord.innerText = query;
+      resMeaning.innerText = "Looking up definition...";
+      resSynonyms.innerHTML = "";
+      statusIndicator.innerText = "";
+      addBtn.style.display = "none";
 
-function updateCount(){
-  const n = allEntries.length;
-  countEl.textContent = n === 0 ? 'No words saved yet' : (n === 1 ? '1 word saved' : n + ' words saved');
-}
+      try {
+        // Attempt Primary Source: Free Dictionary API
+        const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(query)}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          let definition = "No definition found.";
+          let synonyms = [];
 
-function renderEntries(list){
-  if(list.length === 0){
-    entriesEl.innerHTML = '<div class="empty">Nothing here yet — the next unfamiliar word goes above.</div>';
-    return;
-  }
-  entriesEl.innerHTML = '';
-  list.forEach(entry => {
-    const div = document.createElement('div');
-    div.className = 'entry';
-    div.innerHTML = `
-      <div class="entry-top">
-        <div><span class="entry-word">${escapeHtml(entry.word)}</span>${entry.partOfSpeech ? `<span class="entry-pos">${escapeHtml(entry.partOfSpeech)}</span>` : ''}</div>
-        <span class="entry-date">${formatDate(entry.addedAt)}</span>
-      </div>
-      <p class="entry-meaning">${escapeHtml(entry.meaning)}</p>
-      ${entry.example ? `<p class="entry-example">${escapeHtml(entry.example)}</p>` : ''}
-      <button class="entry-remove" data-word="${escapeHtml(entry.word)}">Remove</button>
-    `;
-    entriesEl.appendChild(div);
-  });
-  entriesEl.querySelectorAll('.entry-remove').forEach(btn => {
-    btn.addEventListener('click', () => removeEntry(btn.getAttribute('data-word')));
-  });
-}
+          if (data[0]?.meanings?.length > 0) {
+            definition = data[0].meanings[0].definitions[0]?.definition || definition;
+            data[0].meanings.forEach(m => {
+              if (m.synonyms) synonyms.push(...m.synonyms);
+              m.definitions?.forEach(d => { if (d.synonyms) synonyms.push(...d.synonyms); });
+            });
+          }
 
-function escapeHtml(str){
-  const d = document.createElement('div');
-  d.textContent = str == null ? '' : String(str);
-  return d.innerHTML;
-}
+          synonyms = [...new Set(synonyms)].slice(0, 6);
+          displaySuccess(query, definition, synonyms);
+          return;
+        }
 
-async function removeEntry(word){
-  try{
-    await window.storage.delete(keyFor(word));
-    allEntries = allEntries.filter(e => e.word.toLowerCase() !== word.toLowerCase());
-    renderEntries(applyFilter());
-    updateCount();
-  }catch(e){
-    setStatus("Couldn't remove that word — try again.", true);
-  }
-}
+        // Fallback Source: Datamuse API (Definitions + Synonyms)
+        const fallbackRes = await fetch(`https://api.datamuse.com/words?sp=${encodeURIComponent(query)}&md=d&rel_syn=${encodeURIComponent(query)}&max=6`);
+        const fallbackData = await fallbackRes.json();
 
-function applyFilter(){
-  const q = searchInput.value.trim().toLowerCase();
-  if(!q) return allEntries;
-  return allEntries.filter(e =>
-    e.word.toLowerCase().includes(q) || (e.meaning && e.meaning.toLowerCase().includes(q))
-  );
-}
+        if (fallbackData && fallbackData.length > 0 && fallbackData[0].defs) {
+          const rawDef = fallbackData[0].defs[0] || "";
+          const cleanDef = rawDef.replace(/^[a-z]+\t/, ""); // remove speech part tag
+          const synonyms = fallbackData.slice(1).map(item => item.word).slice(0, 6);
+          displaySuccess(query, cleanDef || "Found in vocabulary database.", synonyms);
+        } else {
+          throw new Error("Word definition not available.");
+        }
 
-searchInput.addEventListener('input', () => renderEntries(applyFilter()));
+      } catch (err) {
+        resWord.innerText = "Word not found";
+        resMeaning.innerText = "Check your spelling or try another English word.";
+        statusIndicator.innerText = `Details: ${err.message || 'Network request failed'}`;
+        currentData = null;
+      }
+    }
 
-async function lookupWord(word){
-  const system = "You define words for someone reading a novel who just met the word for the first time. The word may occasionally have a small typo (a missing or swapped letter) since it was typed quickly - if so, silently correct it to the most likely intended real word and define that one, and put the corrected spelling in the \"word\" field. Respond with ONLY raw JSON, no markdown fences, no preamble, no explanation, in exactly this shape: {\"word\": \"corrected spelling if needed, else the same word\", \"partOfSpeech\": \"noun\", \"meaning\": \"a single clear sentence defining the word as commonly used\", \"example\": \"a short original example sentence using the word\"}. Keep the meaning to one sentence. Always return valid JSON even if you are unsure of the word - give your best guess rather than refusing.";
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-6",
-      max_tokens: 300,
-      system: system,
-      messages: [{ role: "user", content: `Define the word: "${word}"` }]
-    })
-  });
-  if(!response.ok){
-    throw new Error("API request failed with status " + response.status);
-  }
-  const data = await response.json();
-  const textBlock = (data.content || []).find(b => b.type === 'text' && b.text && b.text.trim().length > 0);
-  if(!textBlock) throw new Error("No text in response");
+    function displaySuccess(word, meaning, synonyms) {
+      document.getElementById('resultWord').innerText = word;
+      document.getElementById('resultMeaning').innerText = meaning;
+      document.getElementById('resultSynonyms').innerHTML = synonyms.length > 0
+        ? synonyms.map(s => `<span class="tag">${s}</span>`).join('')
+        : '<span style="color:#64748b; font-size:0.8rem;">No synonyms found</span>';
+      
+      document.getElementById('addWordBtn').style.display = "block";
+      currentData = { word, meaning, synonyms };
+    }
 
-  const raw = textBlock.text;
-  // Pull out the JSON object even if the model wrapped it in fences or extra prose.
-  const firstBrace = raw.indexOf('{');
-  const lastBrace = raw.lastIndexOf('}');
-  if(firstBrace === -1 || lastBrace === -1 || lastBrace < firstBrace){
-    throw new Error("Could not find JSON in response: " + raw.slice(0, 200));
-  }
-  const jsonSlice = raw.slice(firstBrace, lastBrace + 1);
-  try{
-    return JSON.parse(jsonSlice);
-  }catch(parseErr){
-    throw new Error("Malformed JSON from model: " + jsonSlice.slice(0, 200));
-  }
-}
+    function saveCurrentWord() {
+      if (!currentData) return;
+      let words = JSON.parse(localStorage.getItem('my_words') || '[]');
+      if (!words.some(w => w.word.toLowerCase() === currentData.word.toLowerCase())) {
+        words.unshift(currentData);
+        localStorage.setItem('my_words', JSON.stringify(words));
+        renderList();
+      }
+      document.getElementById('resultArea').style.display = 'none';
+      document.getElementById('wordInput').value = '';
+    }
 
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const word = wordInput.value.trim();
-  if(!word) return;
+    function deleteWord(index) {
+      let words = JSON.parse(localStorage.getItem('my_words') || '[]');
+      words.splice(index, 1);
+      localStorage.setItem('my_words', JSON.stringify(words));
+      renderList();
+    }
 
-  lookupBtn.disabled = true;
-  lookupBtn.textContent = 'Looking up…';
-  setStatus('');
+    function renderList() {
+      const container = document.getElementById('wordList');
+      const words = JSON.parse(localStorage.getItem('my_words') || '[]');
+      if (words.length === 0) {
+        container.innerHTML = '<p style="color:#64748b; font-size:0.9rem;">No words saved yet.</p>';
+        return;
+      }
+      container.innerHTML = words.map((w, idx) => `
+        <div class="word-item">
+          <div class="word-head">
+            <strong style="font-size:1.1rem; color:#60a5fa; text-transform: capitalize;">${w.word}</strong>
+            <button class="del-btn" onclick="deleteWord(${idx})">Remove</button>
+          </div>
+          <p style="margin:6px 0; font-size:0.9rem; color:#cbd5e1;">${w.meaning}</p>
+          <div class="tags">
+            ${(w.synonyms || []).map(s => `<span class="tag">${s}</span>`).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
 
-  try{
-    const def = await lookupWord(word);
-    const finalWord = (def.word && def.word.trim()) ? def.word.trim() : word;
-    const entry = {
-      word: finalWord,
-      partOfSpeech: def.partOfSpeech || '',
-      meaning: def.meaning || '',
-      example: def.example || '',
-      addedAt: new Date().toISOString()
-    };
-    const result = await window.storage.set(keyFor(finalWord), JSON.stringify(entry));
-    if(!result) throw new Error("Save failed");
-
-    allEntries = allEntries.filter(en => en.word.toLowerCase() !== finalWord.toLowerCase());
-    allEntries.unshift(entry);
-    renderEntries(applyFilter());
-    updateCount();
-    wordInput.value = '';
-    setStatus(finalWord.toLowerCase() === word.toLowerCase()
-      ? 'Saved “' + finalWord + '” to your list.'
-      : 'Saved “' + finalWord + '” (auto-corrected from “' + word + '”).');
-  }catch(err){
-    setStatus("Couldn't look that up just now — check your connection and try again.", true);
-  }finally{
-    lookupBtn.disabled = false;
-    lookupBtn.textContent = 'Look up';
-    wordInput.focus();
-  }
-});
-
-loadEntries();
-</script>
+    renderList();
+  </script>
 </body>
 </html>
